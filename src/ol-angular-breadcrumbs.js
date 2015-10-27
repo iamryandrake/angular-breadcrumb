@@ -1,8 +1,3 @@
-/*! angular-breadcrumb - v0.4.1
-* http://ncuillery.github.io/angular-breadcrumb
-* Copyright (c) 2015 Nicolas Cuillery; Licensed MIT */
-
-(function (window, angular, undefined) {
 'use strict';
 
 function isAOlderThanB(scopeA, scopeB) {
@@ -39,7 +34,7 @@ function $Breadcrumb() {
         // Early catch of $viewContentLoaded event
         $rootScope.$on('$viewContentLoaded', function (event) {
             // With nested views, the event occur several times, in "wrong" order
-            if(!event.targetScope.ncyBreadcrumbIgnore &&
+            if(!event.targetScope.olBreadcrumbIgnore &&
                 isAOlderThanB(event.targetScope.$id, $lastViewScope.$id)) {
                 $lastViewScope = event.targetScope;
             }
@@ -70,16 +65,16 @@ function $Breadcrumb() {
 
             conf = $state.get(ref.state);
             // Get breadcrumb options
-            if(conf.ncyBreadcrumb) {
-                if(conf.ncyBreadcrumb.force){ force = true; }
-                if(conf.ncyBreadcrumb.skip){ skip = true; }
+            if(conf.olBreadcrumb) {
+                if(conf.olBreadcrumb.force){ force = true; }
+                if(conf.olBreadcrumb.skip){ skip = true; }
             }
             if((!conf.abstract || $$options.includeAbstract || force) && !skip) {
                 if(ref.paramExpr) {
                     parentParams = $lastViewScope.$eval(ref.paramExpr);
                 }
 
-                conf.ncyBreadcrumbLink = $state.href(ref.state, parentParams || $stateParams || {});
+                conf.olBreadcrumbLink = $state.href(ref.state, parentParams || $stateParams || {});
                 chain.unshift(conf);
             }
         };
@@ -89,10 +84,10 @@ function $Breadcrumb() {
             var ref = parseStateRef(stateRef),
                 conf = $state.get(ref.state);
 
-            if(conf.ncyBreadcrumb && conf.ncyBreadcrumb.parent) {
+            if(conf.olBreadcrumb && conf.olBreadcrumb.parent) {
                 // Handle the "parent" property of the breadcrumb, override the parent/child relation of the state
-                var isFunction = typeof conf.ncyBreadcrumb.parent === 'function';
-                var parentStateRef = isFunction ? conf.ncyBreadcrumb.parent($lastViewScope) : conf.ncyBreadcrumb.parent;
+                var isFunction = typeof conf.olBreadcrumb.parent === 'function';
+                var parentStateRef = isFunction ? conf.olBreadcrumb.parent($lastViewScope) : conf.olBreadcrumb.parent;
                 if(parentStateRef) {
                     return parentStateRef;
                 }
@@ -167,7 +162,7 @@ var getExpression = function(interpolationFunction) {
 var registerWatchers = function(labelWatcherArray, interpolationFunction, viewScope, step) {
     angular.forEach(getExpression(interpolationFunction), function(expression) {
         var watcher = viewScope.$watch(expression, function() {
-            step.ncyBreadcrumbLabel = interpolationFunction(viewScope);
+            step.olBreadcrumbLabel = interpolationFunction(viewScope);
         });
         labelWatcherArray.push(watcher);
     });
@@ -184,15 +179,15 @@ function BreadcrumbDirective($interpolate, $breadcrumb, $rootScope) {
     var $$templates = {
         bootstrap2: '<ul class="breadcrumb">' +
             '<li ng-repeat="step in steps" ng-switch="$last || !!step.abstract" ng-class="{active: $last}">' +
-            '<a ng-switch-when="false" href="{{step.ncyBreadcrumbLink}}">{{step.ncyBreadcrumbLabel}}</a>' +
-            '<span ng-switch-when="true">{{step.ncyBreadcrumbLabel}}</span>' +
+            '<a ng-switch-when="false" href="{{step.olBreadcrumbLink}}">{{step.olBreadcrumbLabel}}</a>' +
+            '<span ng-switch-when="true">{{step.olBreadcrumbLabel}}</span>' +
             '<span class="divider" ng-hide="$last">/</span>' +
             '</li>' +
             '</ul>',
         bootstrap3: '<ol class="breadcrumb">' +
             '<li ng-repeat="step in steps" ng-class="{active: $last}" ng-switch="$last || !!step.abstract">' +
-            '<a ng-switch-when="false" href="{{step.ncyBreadcrumbLink}}">{{step.ncyBreadcrumbLabel}}</a>' +
-            '<span ng-switch-when="true">{{step.ncyBreadcrumbLabel}}</span>' +
+            '<a ng-switch-when="false" href="{{step.olBreadcrumbLink}}">{{step.olBreadcrumbLabel}}</a>' +
+            '<span ng-switch-when="true">{{step.olBreadcrumbLabel}}</span>' +
             '</li>' +
             '</ol>'
     };
@@ -210,23 +205,23 @@ function BreadcrumbDirective($interpolate, $breadcrumb, $rootScope) {
                 var renderBreadcrumb = function() {
                     deregisterWatchers(labelWatchers);
                     labelWatchers = [];
-                    
+
                     var viewScope = $breadcrumb.$getLastViewScope();
                     scope.steps = $breadcrumb.getStatesChain();
                     angular.forEach(scope.steps, function (step) {
-                        if (step.ncyBreadcrumb && step.ncyBreadcrumb.label) {
-                            var parseLabel = $interpolate(step.ncyBreadcrumb.label);
-                            step.ncyBreadcrumbLabel = parseLabel(viewScope);
+                        if (step.olBreadcrumb && step.olBreadcrumb.label) {
+                            var parseLabel = $interpolate(step.olBreadcrumb.label);
+                            step.olBreadcrumbLabel = parseLabel(viewScope);
                             // Watcher for further viewScope updates
                             registerWatchers(labelWatchers, parseLabel, viewScope, step);
                         } else {
-                            step.ncyBreadcrumbLabel = step.name;
+                            step.olBreadcrumbLabel = step.name;
                         }
                     });
                 };
 
                 $rootScope.$on('$viewContentLoaded', function (event) {
-                    if(!event.targetScope.ncyBreadcrumbIgnore) {
+                    if(!event.targetScope.olBreadcrumbIgnore) {
                         renderBreadcrumb();
                     }
                 });
@@ -244,11 +239,11 @@ function BreadcrumbLastDirective($interpolate, $breadcrumb, $rootScope) {
     return {
         restrict: 'A',
         scope: {},
-        template: '{{ncyBreadcrumbLabel}}',
+        template: '{{olBreadcrumbLabel}}',
         compile: function(cElement, cAttrs) {
 
-            // Override the default template if ncyBreadcrumbLast has a value
-            var template = cElement.attr(cAttrs.$attr.ncyBreadcrumbLast);
+            // Override the default template if olBreadcrumbLast has a value
+            var template = cElement.attr(cAttrs.$attr.olBreadcrumbLast);
             if(template) {
                 cElement.html(template);
             }
@@ -260,25 +255,25 @@ function BreadcrumbLastDirective($interpolate, $breadcrumb, $rootScope) {
                     var renderLabel = function() {
                         deregisterWatchers(labelWatchers);
                         labelWatchers = [];
-                        
+
                         var viewScope = $breadcrumb.$getLastViewScope();
                         var lastStep = $breadcrumb.getLastStep();
                         if(lastStep) {
-                            scope.ncyBreadcrumbLink = lastStep.ncyBreadcrumbLink;
-                            if (lastStep.ncyBreadcrumb && lastStep.ncyBreadcrumb.label) {
-                                var parseLabel = $interpolate(lastStep.ncyBreadcrumb.label);
-                                scope.ncyBreadcrumbLabel = parseLabel(viewScope);
+                            scope.olBreadcrumbLink = lastStep.olBreadcrumbLink;
+                            if (lastStep.olBreadcrumb && lastStep.olBreadcrumb.label) {
+                                var parseLabel = $interpolate(lastStep.olBreadcrumb.label);
+                                scope.olBreadcrumbLabel = parseLabel(viewScope);
                                 // Watcher for further viewScope updates
                                 // Tricky last arg: the last step is the entire scope of the directive !
                                 registerWatchers(labelWatchers, parseLabel, viewScope, scope);
                             } else {
-                                scope.ncyBreadcrumbLabel = lastStep.name;
+                                scope.olBreadcrumbLabel = lastStep.name;
                             }
                         }
                     };
 
                     $rootScope.$on('$viewContentLoaded', function (event) {
-                        if(!event.targetScope.ncyBreadcrumbIgnore) {
+                        if(!event.targetScope.olBreadcrumbIgnore) {
                             renderLabel();
                         }
                     });
@@ -293,26 +288,26 @@ function BreadcrumbLastDirective($interpolate, $breadcrumb, $rootScope) {
 }
 BreadcrumbLastDirective.$inject = ['$interpolate', '$breadcrumb', '$rootScope'];
 
-function BreadcrumbTextDirective($interpolate, $breadcrumb, $rootScope) {
+function olBreadcrumbTextDirective($interpolate, $breadcrumb, $rootScope) {
 
     return {
         restrict: 'A',
         scope: {},
-        template: '{{ncyBreadcrumbChain}}',
+        template: '{{olBreadcrumbChain}}',
 
         compile: function(cElement, cAttrs) {
-            // Override the default template if ncyBreadcrumbText has a value
-            var template = cElement.attr(cAttrs.$attr.ncyBreadcrumbText);
+            // Override the default template if ncyolBreadcrumbText has a value
+            var template = cElement.attr(cAttrs.$attr.ncyolBreadcrumbText);
             if(template) {
                 cElement.html(template);
             }
-            
-            var separator = cElement.attr(cAttrs.$attr.ncyBreadcrumbTextSeparator) || ' / ';
+
+            var separator = cElement.attr(cAttrs.$attr.ncyolBreadcrumbTextSeparator) || ' / ';
 
             return {
                 post: function postLink(scope) {
                     var labelWatchers = [];
-                    
+
                     var registerWatchersText = function(labelWatcherArray, interpolationFunction, viewScope) {
                         angular.forEach(getExpression(interpolationFunction), function(expression) {
                             var watcher = viewScope.$watch(expression, function(newValue, oldValue) {
@@ -327,13 +322,13 @@ function BreadcrumbTextDirective($interpolate, $breadcrumb, $rootScope) {
                     var renderLabel = function() {
                         deregisterWatchers(labelWatchers);
                         labelWatchers = [];
-                        
+
                         var viewScope = $breadcrumb.$getLastViewScope();
                         var steps = $breadcrumb.getStatesChain();
                         var combinedLabels = [];
                         angular.forEach(steps, function (step) {
-                            if (step.ncyBreadcrumb && step.ncyBreadcrumb.label) {
-                                var parseLabel = $interpolate(step.ncyBreadcrumb.label);
+                            if (step.olBreadcrumb && step.olBreadcrumb.label) {
+                                var parseLabel = $interpolate(step.olBreadcrumb.label);
                                 combinedLabels.push(parseLabel(viewScope));
                                 // Watcher for further viewScope updates
                                 registerWatchersText(labelWatchers, parseLabel, viewScope);
@@ -341,12 +336,12 @@ function BreadcrumbTextDirective($interpolate, $breadcrumb, $rootScope) {
                                 combinedLabels.push(step.name);
                             }
                         });
-                        
-                        scope.ncyBreadcrumbChain = combinedLabels.join(separator);
+
+                        scope.olBreadcrumbChain = combinedLabels.join(separator);
                     };
 
                     $rootScope.$on('$viewContentLoaded', function (event) {
-                        if(!event.targetScope.ncyBreadcrumbIgnore) {
+                        if(!event.targetScope.olBreadcrumbIgnore) {
                             renderLabel();
                         }
                     });
@@ -359,11 +354,10 @@ function BreadcrumbTextDirective($interpolate, $breadcrumb, $rootScope) {
         }
     };
 }
-BreadcrumbTextDirective.$inject = ['$interpolate', '$breadcrumb', '$rootScope'];
+olBreadcrumbTextDirective.$inject = ['$interpolate', '$breadcrumb', '$rootScope'];
 
-angular.module('ncy-angular-breadcrumb', ['ui.router.state'])
+angular.module('ol-angular-breadcrumbs', ['ui.router.state'])
     .provider('$breadcrumb', $Breadcrumb)
-    .directive('ncyBreadcrumb', BreadcrumbDirective)
-    .directive('ncyBreadcrumbLast', BreadcrumbLastDirective)
-    .directive('ncyBreadcrumbText', BreadcrumbTextDirective);
-})(window, window.angular);
+    .directive('olBreadcrumb', BreadcrumbDirective)
+    .directive('olBreadcrumbLast', BreadcrumbLastDirective)
+    .directive('olBreadcrumbText', olBreadcrumbTextDirective);
